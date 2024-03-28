@@ -1,4 +1,6 @@
 import numpy as np
+# TODO : adding randomness to agents
+Random_miss_prob = 0.05
 
 
 class Coperative:
@@ -6,7 +8,8 @@ class Coperative:
         self.points = 0
 
     def take_action(self):
-        return 1  # 1 means Cooperate
+        # 1 means Cooperate  // here we are adding missing chance
+        return 1 if np.random.rand > Random_miss_prob else 0
 
 
 class Cheater:
@@ -23,7 +26,8 @@ class Random:
 
     def take_action(self):
         if np.random.rand() > 0.5:
-            return 1
+
+            return 1 if np.random.rand > Random_miss_prob else 0
         else:
             return 0
 
@@ -40,7 +44,7 @@ class CopyCat:
         elif (self.memory[-1] == 0):
             return 0
         else:
-            return 1
+            return 1 if np.random.rand > Random_miss_prob else 0
 
 
 class CopyKitten:
@@ -59,6 +63,6 @@ class CopyKitten:
             if self.memory[-1] == 0 and self.memory[-2] == 0:
                 return 0  # the enemy didn't coperated two times in a row
             else:
-                return 1
+                return 1 if np.random.rand > Random_miss_prob else 0
         else:
-            return 1
+            return 1 if np.random.rand > Random_miss_prob else 0
