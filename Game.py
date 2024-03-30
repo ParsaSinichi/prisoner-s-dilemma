@@ -1,6 +1,7 @@
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 import matplotlib.pyplot as plt
+from Agents import *
 # both Colab, one colab one not, both not
 Points = [(1, 1), (1, 0), (0, 1), (0, 0)]
 
@@ -22,25 +23,6 @@ def initial_counts():
         agent_changes[agent_name] = []
 
 
-def PlayGame(agent1, agent2, round, reward):
-    for _ in range(round):
-        ag1 = agent1.take_action()
-        ag2 = agent2.take_action()
-        if ag1 == 1 and ag2 == 1:
-            agent1.points += reward
-            agent2.points += reward
-        if ag1 == 0 and ag2 == 0:
-            pass
-        if ag1 == 1 and ag2 == 0:
-            agent1.points += reward
-            agent2.points -= reward
-        if ag1 == 0 and ag2 == 1:
-            agent1.points -= reward
-            agent2.points += reward
-    print(f"AGENT 1 : {agent1.points}")
-    print(f"AGENT 2 : {agent2.points}")
-
-
 def PlayGame1(round, reward, del_num):
     global Agents, Tourn
     """
@@ -48,7 +30,7 @@ def PlayGame1(round, reward, del_num):
     del_num : number of players to delete after each torunoment match
     """
     initial_counts()
-    while (Tourn <= 20):
+    while (Tourn <= 3):
         # TODO the round should not be here i guess , because now, it plays one round with each agent
         for i in range(len(Agents)):
             agent1 = Agents[i]
@@ -102,65 +84,6 @@ def update_agents(del_num):
         Agents[i].points = 0
 
 
-class Coperative:
-    def __init__(self) -> None:
-        self.points = 0
-
-    def take_action(self):
-        return 1  # 1 means Coperate
-
-
-class Cheater:
-    def __init__(self) -> None:
-        self.points = 0
-
-    def take_action(self):
-        return 0  # 0 means no coperate
-
-
-class Random:
-    def __init__(self) -> None:
-        self.points = 0
-
-    def take_action(self):
-        if np.random.rand() > 0.5:
-            return 1
-        else:
-            return 0
-
-
-class CopyKitten:
-    def __init__(self) -> None:
-        self.points = 0
-        self.memory = []
-
-    def take_action(self):
-        if len(self.memory) == 0:
-            return 1  # coperates at first
-        if len(self.memory) > 1:
-            if self.memory[-1] == 0 and self.memory[-2] == 0:
-                return 0  # the enemy didn't coperated two time in a row
-            else:
-                return 1
-        else:
-            return 1
-
-
-class CopyCat:
-    def __init__(self) -> None:
-        self.points = 0
-        self.memory = []
-
-    def take_action(self):
-        if len(self.memory) == 0:
-
-            return 1  # first coperates
-        elif (self.memory[-1] == 0):
-            return 0
-        else:
-            return 1
-
-
 def add_agent(agent, number):
     global Agents
     for _ in range(number):
@@ -168,28 +91,15 @@ def add_agent(agent, number):
         Agents.append(new_instance)
 
 
-def plot_agents(agent_number, bins, agent_name):
-    num_bins = bins
-    # for i in agent_changes
-# Increase figure size
-    plt.figure(figsize=(10, 6))
-
-    # Plotting
-    plt.plot(range(len(agent_number)), agent_number, color='blue')
-    plt.xlabel('Category')
-    plt.ylabel('Count')
-    plt.title(f'Number of {agent_name}')
-    plt.xticks(range(0, len(agent_number), len(agent_number) // num_bins),
-               [' {}'.format(i) for i in range(
-                   1, len(agent_number) + 1, len(agent_number) // num_bins)],
-               rotation=45)
-    plt.tight_layout()  # Adjust layout to prevent overlap
-    plt.show()
-
-
 def plot_agents2():
-    global agent_changes
 
+    global agent_changes
+    max_agent_len = len(agent_changes[(
+        max(agent_changes, key=lambda k: len(agent_changes[k])))])
+    bins = max_agent_len//2 + 1
+    for key, value in agent_changes.items():
+        while (len(value) < max_agent_len):
+            agent_changes[key].append(0)
     colors = ['blue', 'green', 'red', 'orange',
               'purple']  # Define a list of colors
 
@@ -198,9 +108,9 @@ def plot_agents2():
         plt.plot(range(len(value)), value, color=colors[i % len(
             colors)], label=key)  # Add label=key for legend
 
-    plt.xticks(range(0, len(value), len(value) // 5),
+    plt.xticks(range(0, len(value), len(value) // bins),
                ['{}'.format(i)
-                for i in range(1, len(value) + 1, len(value) // 5)],
+                for i in range(1, len(value) + 1, len(value) // bins)],
                rotation=45)
 
     plt.xlabel('Number of iteration')
@@ -211,6 +121,8 @@ def plot_agents2():
 
     # Set y-axis tick locator to display only integer values
     plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.gca().set_yticks(
+        [item for sublist in agent_changes.values() for item in sublist])
 
     plt.show()
 
@@ -224,20 +136,17 @@ def get_agents_count():
 
 
 if __name__ == "__main__":
-    n_cop = 21
-    n_copy = 2
+    # n_cop = 21
+    # n_copy = 2
     n_cheater = 5
-    n_copycit = 3
+    n_copycit = 2
     n_cop = 17
 
     add_agent(CopyKitten, n_copycit)
     add_agent(Cheater, n_cheater)
     add_agent(Coperative, n_cop)
+    add_agent(CopyCat, 1)
 
     reward = 1
     PlayGame1(6, reward, 1)
-    # plot_agents(agent_changes['CopyKitten'], 5, "CopyKitten")
-    # plot_agents(agent_changes['Cheater'], 5, "Cheater")
-    # plot_agents(agent_changes['Coperative'], 5, "Coperative")
-    # plot_agents2()
-    print("Hello")
+    plot_agents2()
